@@ -46,11 +46,19 @@ func main() {
 	url := "https://moderate.cleantalk.org/api2.0"
 	jsonReq, err := json.Marshal(request)
 	if err != nil {
+		log.Fatal("Issue while marshalling the json call")
 		log.Fatal(err)
 		fmt.Println(err)
 	}
 
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		log.Fatal("Issue while calling the api")
+		log.Fatal(err)
+		fmt.Println(err)
+	}
+
+	fmt.Println(res)
 
 	fmt.Println("Init checks")
 }
