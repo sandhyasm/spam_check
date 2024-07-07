@@ -58,7 +58,13 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Println(res)
+	var response spamResponse
+	resErr := json.NewDecoder(res.Body).Decode(&response)
+	if resErr != nil {
+		log.Fatal("Error while decoding the response")
+		log.Fatal(resErr)
+		fmt.Println(resErr)
+	}
 
-	fmt.Println("Init checks")
+	fmt.Println(resErr)
 }
