@@ -1,6 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+)
 
 type spamRequest struct {
 	MethodName     string `json:"method_name"`
@@ -27,7 +33,7 @@ func main() {
 		"js_on":1,"submit_time":15}' https://moderate.cleantalk.org/api2.0
 	*/
 
-	request := spamRequest{
+	request := &spamRequest{
 		MethodName:     "check_message",
 		AuthKey:        "nysumygepuvetud",
 		SenderEmail:    "abc@test.com",
@@ -36,6 +42,15 @@ func main() {
 		JsOn:           1,
 		SubmitTime:     15,
 	}
+
+	url := "https://moderate.cleantalk.org/api2.0"
+	jsonReq, err := json.Marshal(request)
+	if err != nil {
+		log.Fatal(err)
+		fmt.Println(err)
+	}
+
+	res, err := http.Post(url, "application/json", bytes.NewBuffer(jsonReq))
 
 	fmt.Println("Init checks")
 }
