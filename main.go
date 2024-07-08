@@ -24,18 +24,9 @@ type spamResponse struct {
 
 func main() {
 
-	/*
-		data='{"method_name":"check_message",
-		"auth_key":"your_acccess_key",
-		"sender_email":"stop_email@example.com",
-		"sender_nickname":"John Doe",
-		"sender_ip":"127.0.0.1",
-		"js_on":1,"submit_time":15}' https://moderate.cleantalk.org/api2.0
-	*/
-
 	request := &spamRequest{
 		MethodName:     "check_message",
-		AuthKey:        "nysumygepuvetud",
+		AuthKey:        "hdfhdhgdhvgdhgb",
 		SenderEmail:    "abc@test.com",
 		SenderNickname: "Abc Test",
 		SenderIp:       "120.18.17.10",
@@ -67,4 +58,21 @@ func main() {
 	}
 
 	fmt.Println(resErr)
+}
+
+func getIP() (string, error) {
+	res, err := http.Get("https://ipify.org/?format=text")
+	if err != nil {
+		return "", err
+	}
+
+	defer res.Body.Close()
+
+	buf := new(bytes.Buffer)
+	_, err = buf.ReadFrom(res.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }
