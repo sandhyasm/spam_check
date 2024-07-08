@@ -24,12 +24,19 @@ type spamResponse struct {
 
 func main() {
 
+	userIP, errip := getIP()
+	if errip != nil {
+		log.Fatal(errip)
+		log.Println(errip)
+		fmt.Println(errip)
+	}
+
 	request := &spamRequest{
 		MethodName:     "check_message",
 		AuthKey:        "hdfhdhgdhvgdhgb",
 		SenderEmail:    "abc@test.com",
 		SenderNickname: "Abc Test",
-		SenderIp:       "120.18.17.10",
+		SenderIp:       userIP,
 		JsOn:           1,
 		SubmitTime:     15,
 	}
