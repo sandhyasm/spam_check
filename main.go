@@ -10,6 +10,7 @@ import (
 
 type spamRequest struct {
 	MethodName     string `json:"method_name"`
+	Message        string `json:"message"`
 	AuthKey        string `json:"auth_key"`
 	SenderEmail    string `json:"sender_email"`
 	SenderNickname string `json:"sender_nickname"`
@@ -33,6 +34,7 @@ func main() {
 
 	request := &spamRequest{
 		MethodName:     "check_message",
+		Message:        "hydg agdhs sgfn sgnf",
 		AuthKey:        "hdfhdhgdhvgdhgb",
 		SenderEmail:    "abc@test.com",
 		SenderNickname: "Abc Test",
