@@ -6,10 +6,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 type spamRequest struct {
 	MethodName     string `json:"method_name"`
+	Message        string `json:"message"`
 	AuthKey        string `json:"auth_key"`
 	SenderEmail    string `json:"sender_email"`
 	SenderNickname string `json:"sender_nickname"`
@@ -23,22 +27,43 @@ type spamResponse struct {
 }
 
 func main() {
+	app := fiber.New()
+	app.Use(logger.New())
 
-	/*
-		data='{"method_name":"check_message",
-		"auth_key":"your_acccess_key",
-		"sender_email":"stop_email@example.com",
-		"sender_nickname":"John Doe",
-		"sender_ip":"127.0.0.1",
-		"js_on":1,"submit_time":15}' https://moderate.cleantalk.org/api2.0
-	*/
+	app.Post("/api/spam-check", func(c *fiber.Ctx) error {
+		res, err := checkMessageSpam()
+		if err != nil {
+			return err
+		}
+		return c.Status(200).JSON(fiber.Map{
+			"spamResponse": res,
+		})
+	})
+	response, err := checkMessageSpam()
+	if err != nil {
+		log.Fatal(err)
+		fmt.Println(err)
+	} else {
+		fmt.Println(response)
+	}
+}
+
+func checkMessageSpam() (*spamResponse, error) {
+	userIP, errip := getIP()
+	if errip != nil {
+		log.Fatal(errip)
+		log.Println(errip)
+		fmt.Println(errip)
+		return nil, errip
+	}
 
 	request := &spamRequest{
 		MethodName:     "check_message",
-		AuthKey:        "nysumygepuvetud",
+		Message:        "hydg agdhs sgfn sgnf",
+		AuthKey:        "hdfhdhgdhvgdhgb",
 		SenderEmail:    "abc@test.com",
 		SenderNickname: "Abc Test",
-		SenderIp:       "120.18.17.10",
+		SenderIp:       userIP,
 		JsOn:           1,
 		SubmitTime:     15,
 	}
@@ -49,6 +74,7 @@ func main() {
 		log.Fatal("Issue while marshalling the json call")
 		log.Fatal(err)
 		fmt.Println(err)
+		return nil, err
 	}
 
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(jsonReq))
@@ -56,6 +82,7 @@ func main() {
 		log.Fatal("Issue while calling the api")
 		log.Fatal(err)
 		fmt.Println(err)
+		return nil, err
 	}
 
 	var response spamResponse
@@ -64,7 +91,25 @@ func main() {
 		log.Fatal("Error while decoding the response")
 		log.Fatal(resErr)
 		fmt.Println(resErr)
+		return nil, resErr
 	}
 
-	fmt.Println(resErr)
+	return &response, nil
+}
+
+func getIP() (string, error) {
+	res, err := http.Get("https://ipify.org/?format=text")
+	if err != nil {
+		return "", err
+	}
+
+	defer res.Body.Close()
+
+	buf := new(bytes.Buffer)
+	_, err = buf.ReadFrom(res.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }
