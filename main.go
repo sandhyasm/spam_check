@@ -24,6 +24,13 @@ type spamResponse struct {
 }
 
 func main() {
+	response, err := checkMessageSpam()
+	if err != nil {
+		log.Fatal(err)
+		fmt.Println(err)
+	} else {
+		fmt.Println(response)
+	}
 
 }
 
