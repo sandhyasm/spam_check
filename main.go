@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 type spamRequest struct {
@@ -24,6 +27,18 @@ type spamResponse struct {
 }
 
 func main() {
+	app := fiber.New()
+	app.Use(logger.New())
+
+	app.Post("/api/spam-check", func(c *fiber.Ctx) error {
+		res, err := checkMessageSpam()
+		if err != nil {
+			return err
+		}
+		return c.Status(200).JSON(fiber.Map{
+			"spamResponse": res,
+		})
+	})
 	response, err := checkMessageSpam()
 	if err != nil {
 		log.Fatal(err)
@@ -31,7 +46,6 @@ func main() {
 	} else {
 		fmt.Println(response)
 	}
-
 }
 
 func checkMessageSpam() (*spamResponse, error) {
