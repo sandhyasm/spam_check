@@ -25,11 +25,15 @@ type spamResponse struct {
 
 func main() {
 
+}
+
+func checkMessageSpam() (*spamResponse, error) {
 	userIP, errip := getIP()
 	if errip != nil {
 		log.Fatal(errip)
 		log.Println(errip)
 		fmt.Println(errip)
+		return nil, errip
 	}
 
 	request := &spamRequest{
@@ -49,6 +53,7 @@ func main() {
 		log.Fatal("Issue while marshalling the json call")
 		log.Fatal(err)
 		fmt.Println(err)
+		return nil, err
 	}
 
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(jsonReq))
@@ -56,6 +61,7 @@ func main() {
 		log.Fatal("Issue while calling the api")
 		log.Fatal(err)
 		fmt.Println(err)
+		return nil, err
 	}
 
 	var response spamResponse
@@ -64,9 +70,10 @@ func main() {
 		log.Fatal("Error while decoding the response")
 		log.Fatal(resErr)
 		fmt.Println(resErr)
+		return nil, resErr
 	}
 
-	fmt.Println(resErr)
+	return &response, nil
 }
 
 func getIP() (string, error) {
