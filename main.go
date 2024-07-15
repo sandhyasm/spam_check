@@ -31,6 +31,7 @@ func main() {
 	app.Use(logger.New())
 
 	app.Post("/api/spam-check", func(c *fiber.Ctx) error {
+		fmt.Println("Inside api call")
 		res, err := checkMessageSpam()
 		if err != nil {
 			return err
@@ -60,7 +61,7 @@ func checkMessageSpam() (*spamResponse, error) {
 	request := &spamRequest{
 		MethodName:     "check_message",
 		Message:        "hydg agdhs sgfn sgnf",
-		AuthKey:        "hdfhdhgdhvgdhgb",
+		AuthKey:        "nysumygepuvetud",
 		SenderEmail:    "abc@test.com",
 		SenderNickname: "Abc Test",
 		SenderIp:       userIP,
