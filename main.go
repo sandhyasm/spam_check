@@ -11,16 +11,21 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
+const (
+	REFERRER   = "https://www.google.com"
+	USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+)
+
 type spamRequest struct {
-	MethodName     string     `json:"method_name"`
-	Message        string     `json:"message"`
-	AuthKey        string     `json:"auth_key"`
-	SenderEmail    string     `json:"sender_email"`
-	SenderNickname string     `json:"sender_nickname"`
-	SenderIp       string     `json:"sender_ip"`
-	JsOn           int        `json:"js_on"`
-	SubmitTime     int        `json:"submit_time"`
-	SenderInfo     senderInfo `json:"sender_info"`
+	MethodName     string      `json:"method_name"`
+	Message        string      `json:"message"`
+	AuthKey        string      `json:"auth_key"`
+	SenderEmail    string      `json:"sender_email"`
+	SenderNickname string      `json:"sender_nickname"`
+	SenderIp       string      `json:"sender_ip"`
+	JsOn           int         `json:"js_on"`
+	SubmitTime     int         `json:"submit_time"`
+	SenderInfo     *senderInfo `json:"sender_info"`
 }
 
 type senderInfo struct {
@@ -83,6 +88,10 @@ func checkMessageSpam() (*spamResponse, error) {
 		SenderIp:       userIP,
 		JsOn:           1,
 		SubmitTime:     15,
+		SenderInfo: &senderInfo{
+			Referrer:  REFERRER,
+			UserAgent: USER_AGENT,
+		},
 	}
 
 	url := "https://moderate.cleantalk.org/api2.0"
@@ -94,7 +103,7 @@ func checkMessageSpam() (*spamResponse, error) {
 		return nil, err
 	}
 
-	res, err := http.Post(url, "application/json", bytes.NewBuffer(jsonReq))
+	res, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq))
 	if err != nil {
 		log.Fatal("Issue while calling the api")
 		log.Fatal(err)
