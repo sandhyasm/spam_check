@@ -12,14 +12,20 @@ import (
 )
 
 type spamRequest struct {
-	MethodName     string `json:"method_name"`
-	Message        string `json:"message"`
-	AuthKey        string `json:"auth_key"`
-	SenderEmail    string `json:"sender_email"`
-	SenderNickname string `json:"sender_nickname"`
-	SenderIp       string `json:"sender_ip"`
-	JsOn           int    `json:"js_on"`
-	SubmitTime     int    `json:"submit_time"`
+	MethodName     string     `json:"method_name"`
+	Message        string     `json:"message"`
+	AuthKey        string     `json:"auth_key"`
+	SenderEmail    string     `json:"sender_email"`
+	SenderNickname string     `json:"sender_nickname"`
+	SenderIp       string     `json:"sender_ip"`
+	JsOn           int        `json:"js_on"`
+	SubmitTime     int        `json:"submit_time"`
+	SenderInfo     senderInfo `json:"sender_info"`
+}
+
+type senderInfo struct {
+	Referrer  string `json:"referrer"`
+	UserAgent string `json:"user_agent"`
 }
 
 type spamResponse struct {
@@ -57,6 +63,16 @@ func checkMessageSpam() (*spamResponse, error) {
 		fmt.Println(errip)
 		return nil, errip
 	}
+
+	// forgot sender info to pass
+	/*
+		all_headers — HTTP-request headers (JSON encoded);
+		sender_nickname — nickname you want to check for spam;
+		message — text of the message you want to check for spam, can contain HTML-tags;
+		sender_info — information about a sender, should be JSON encoded, next fields are mandatory:
+			REFFERRER — content of $_SERVER['HTTP_REFERER']
+			USER_AGENT — content of $_SERVER['HTTP_USER_AGENT']
+	*/
 
 	request := &spamRequest{
 		MethodName:     "check_message",
