@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -34,7 +35,8 @@ type senderInfo struct {
 }
 
 type spamResponse struct {
-	Data map[string]interface{} `json:"data"`
+	Allow   int    `json:"allow"`
+	Comment string `json:"comment"`
 }
 
 func main() {
@@ -103,7 +105,7 @@ func checkMessageSpam() (*spamResponse, error) {
 		return nil, err
 	}
 
-	res, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq))
 	if err != nil {
 		log.Fatal("Issue while calling the api")
 		log.Fatal(err)
@@ -111,13 +113,28 @@ func checkMessageSpam() (*spamResponse, error) {
 		return nil, err
 	}
 
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return nil, err
+	}
+
 	var response spamResponse
-	resErr := json.NewDecoder(res.Body).Decode(&response)
-	if resErr != nil {
-		log.Fatal("Error while decoding the response")
-		log.Fatal(resErr)
-		fmt.Println(resErr)
-		return nil, resErr
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		fmt.Println("Error unmarshalling response body:", err)
+		return nil, err
 	}
 
 	return &response, nil
