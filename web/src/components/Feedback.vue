@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue'
-
+const userName = ref('')
+const email =  ref('')
+const message = ref('')
 defineProps({
   msg: String,
 })
@@ -13,17 +15,17 @@ const count = ref(0)
   <div class="card">
     <div>
       <label for="name">Enter Name:  </label>
-      <input type="text">
+      <input type="text" v-model="userName">
     </div>
     <br>
     <div>
       <label for="email">Enter Email:  </label>
-      <input type="text">
+      <input type="text" v-model="email">
     </div>
     <br>
     <div>
-      <label for="name">Enter Feedback:  </label>
-      <input class="is-box" type="text">
+      <label for="name">Enter Message:  </label>
+      <input class="is-box" type="text" v-model="message">
     </div>
     <br>
     <button type="button" class="is-button" @click="">Send</button>
