@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 
@@ -11,19 +12,35 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
+const (
+	REFERRER   = "https://www.google.com"
+	USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+)
+
 type spamRequest struct {
-	MethodName     string `json:"method_name"`
-	Message        string `json:"message"`
-	AuthKey        string `json:"auth_key"`
-	SenderEmail    string `json:"sender_email"`
-	SenderNickname string `json:"sender_nickname"`
-	SenderIp       string `json:"sender_ip"`
-	JsOn           int    `json:"js_on"`
-	SubmitTime     int    `json:"submit_time"`
+	MethodName     string      `json:"method_name"`
+	Message        string      `json:"message"`
+	AuthKey        string      `json:"auth_key"`
+	SenderEmail    string      `json:"sender_email"`
+	SenderNickname string      `json:"sender_nickname"`
+	SenderIp       string      `json:"sender_ip"`
+	JsOn           int         `json:"js_on"`
+	SubmitTime     int         `json:"submit_time"`
+	SenderInfo     *senderInfo `json:"sender_info"`
+}
+
+type senderInfo struct {
+	Referrer  string `json:"referrer"`
+	UserAgent string `json:"user_agent"`
 }
 
 type spamResponse struct {
-	Data map[string]interface{} `json:"data"`
+	Allow         int    `json:"allow"`
+	Comment       string `json:"comment"`
+	StopQueue     int    `json:"stop_queue"`
+	Spam          int    `json:"spam"`
+	Blacklisted   int    `json:"blacklisted"`
+	AccountStatus int    `json:"account_status"`
 }
 
 func main() {
@@ -67,6 +84,10 @@ func checkMessageSpam() (*spamResponse, error) {
 		SenderIp:       userIP,
 		JsOn:           1,
 		SubmitTime:     15,
+		SenderInfo: &senderInfo{
+			Referrer:  REFERRER,
+			UserAgent: USER_AGENT,
+		},
 	}
 
 	url := "https://moderate.cleantalk.org/api2.0"
@@ -78,7 +99,7 @@ func checkMessageSpam() (*spamResponse, error) {
 		return nil, err
 	}
 
-	res, err := http.Post(url, "application/json", bytes.NewBuffer(jsonReq))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonReq))
 	if err != nil {
 		log.Fatal("Issue while calling the api")
 		log.Fatal(err)
@@ -86,13 +107,28 @@ func checkMessageSpam() (*spamResponse, error) {
 		return nil, err
 	}
 
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return nil, err
+	}
+
 	var response spamResponse
-	resErr := json.NewDecoder(res.Body).Decode(&response)
-	if resErr != nil {
-		log.Fatal("Error while decoding the response")
-		log.Fatal(resErr)
-		fmt.Println(resErr)
-		return nil, resErr
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		fmt.Println("Error unmarshalling response body:", err)
+		return nil, err
 	}
 
 	return &response, nil
