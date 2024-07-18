@@ -35,8 +35,12 @@ type senderInfo struct {
 }
 
 type spamResponse struct {
-	Allow   int    `json:"allow"`
-	Comment string `json:"comment"`
+	Allow         int    `json:"allow"`
+	Comment       string `json:"comment"`
+	StopQueue     int    `json:"stop_queue"`
+	Spam          int    `json:"spam"`
+	Blacklisted   int    `json:"blacklisted"`
+	AccountStatus int    `json:"account_status"`
 }
 
 func main() {
@@ -70,16 +74,6 @@ func checkMessageSpam() (*spamResponse, error) {
 		fmt.Println(errip)
 		return nil, errip
 	}
-
-	// forgot sender info to pass
-	/*
-		all_headers — HTTP-request headers (JSON encoded);
-		sender_nickname — nickname you want to check for spam;
-		message — text of the message you want to check for spam, can contain HTML-tags;
-		sender_info — information about a sender, should be JSON encoded, next fields are mandatory:
-			REFFERRER — content of $_SERVER['HTTP_REFERER']
-			USER_AGENT — content of $_SERVER['HTTP_USER_AGENT']
-	*/
 
 	request := &spamRequest{
 		MethodName:     "check_message",
