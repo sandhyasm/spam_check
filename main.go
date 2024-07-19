@@ -7,12 +7,15 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 const (
+	aTest      = "testbdjfbdgb"
 	REFERRER   = "https://www.google.com"
 	USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 )
@@ -43,30 +46,49 @@ type spamResponse struct {
 	AccountStatus int    `json:"account_status"`
 }
 
+type userRequest struct {
+	UserName string `query:"userName"`
+	Email    string `query:"email"`
+	Message  string `query:"message"`
+}
+
 func main() {
 	app := fiber.New()
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:5173",
+		AllowMethods: "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
 	app.Use(logger.New())
 
 	app.Post("/api/spam-check", func(c *fiber.Ctx) error {
+		var req userRequest
 		fmt.Println("Inside api call")
-		res, err := checkMessageSpam()
+		if err := c.BodyParser(&req); err != nil {
+			log.Fatal("error while parsing a request body")
+			log.Fatal(err)
+			return err
+		}
+		res, err := checkMessageSpam(req)
 		if err != nil {
 			return err
 		}
+
+		var dynamicErr string
+		if strings.Contains(res.Comment, "Trial period expired.") || strings.Contains(res.Comment, "Antispam disabled") {
+			dynamicErr = "Something went wrong. Please contact to support."
+		} else if res.Allow == 0 || res.Spam == 1 || res.AccountStatus == 0 {
+			dynamicErr = ""
+		}
 		return c.Status(200).JSON(fiber.Map{
 			"spamResponse": res,
+			"apiErr":       dynamicErr,
 		})
 	})
-	response, err := checkMessageSpam()
-	if err != nil {
-		log.Fatal(err)
-		fmt.Println(err)
-	} else {
-		fmt.Println(response)
-	}
+	app.Listen(":8080")
 }
 
-func checkMessageSpam() (*spamResponse, error) {
+func checkMessageSpam(requestBody userRequest) (*spamResponse, error) {
 	userIP, errip := getIP()
 	if errip != nil {
 		log.Fatal(errip)
@@ -77,10 +99,10 @@ func checkMessageSpam() (*spamResponse, error) {
 
 	request := &spamRequest{
 		MethodName:     "check_message",
-		Message:        "hydg agdhs sgfn sgnf",
-		AuthKey:        "nysumygepuvetud",
-		SenderEmail:    "abc@test.com",
-		SenderNickname: "Abc Test",
+		Message:        requestBody.Message,
+		AuthKey:        aTest,
+		SenderEmail:    requestBody.Email,
+		SenderNickname: requestBody.UserName,
 		SenderIp:       userIP,
 		JsOn:           1,
 		SubmitTime:     15,
