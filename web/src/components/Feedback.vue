@@ -18,9 +18,8 @@ const checkSpamMessage = async () => {
     } else {
       response.value = res.data.spamResponse
     }
-    
   } catch (error) {
-    console.log(error)
+    error.value = error
   }
 }
 
@@ -47,6 +46,9 @@ const count = ref(0)
     <br>
     <button type="button" class="is-button" @click="checkSpamMessage">Send</button>
   </div>
+  <div>
+    <p v-if="error" class="is-error"> {{ error }}</p>
+  </div>
 </template>
 <style scoped>
 .read-the-docs {
@@ -68,5 +70,8 @@ const count = ref(0)
 .is-box{
   width: 250px;
   height: 100px;
+}
+.is-error {
+  color: red;
 }
 </style>
