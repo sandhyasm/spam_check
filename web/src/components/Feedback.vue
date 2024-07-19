@@ -48,6 +48,7 @@ const count = ref(0)
   </div>
   <div>
     <p v-if="error" class="is-error"> {{ error }}</p>
+    <p v-else class="is_success">{{ response.comment }}</p>
   </div>
 </template>
 <style scoped>
@@ -73,5 +74,8 @@ const count = ref(0)
 }
 .is-error {
   color: red;
+}
+.is_success{
+  color: #04AA6D;
 }
 </style>

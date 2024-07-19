@@ -75,8 +75,10 @@ func main() {
 		}
 
 		var dynamicErr string
-		if strings.Contains(res.Comment, "Trial period expired.") {
+		if strings.Contains(res.Comment, "Trial period expired.") || strings.Contains(res.Comment, "Antispam disabled") {
 			dynamicErr = "Something went wrong. Please contact to support."
+		} else if res.Allow == 0 || res.Spam == 1 || res.AccountStatus == 0 {
+			dynamicErr = ""
 		}
 		return c.Status(200).JSON(fiber.Map{
 			"spamResponse": res,
