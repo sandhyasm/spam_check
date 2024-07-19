@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
@@ -52,6 +53,11 @@ type userRequest struct {
 
 func main() {
 	app := fiber.New()
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:8080",
+		AllowMethods: "POST, GET, PUT, DELETE",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
 	app.Use(logger.New())
 
 	app.Post("/api/spam-check", func(c *fiber.Ctx) error {
