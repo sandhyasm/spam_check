@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -14,7 +15,7 @@ import (
 )
 
 const (
-	aTest      = "nysumygepuvetud"
+	aTest      = "testbdjfbdgb"
 	REFERRER   = "https://www.google.com"
 	USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 )
@@ -72,8 +73,14 @@ func main() {
 		if err != nil {
 			return err
 		}
+
+		var dynamicErr string
+		if strings.Contains(res.Comment, "Trial period expired.") {
+			dynamicErr = "Something went wrong. Please contact to support."
+		}
 		return c.Status(200).JSON(fiber.Map{
 			"spamResponse": res,
+			"apiErr":       dynamicErr,
 		})
 	})
 	app.Listen(":8080")

@@ -5,6 +5,7 @@ const userName = ref('')
 const email =  ref('')
 const message = ref('')
 const response = ref('')
+const error = ref('')
 defineProps({
   msg: String,
 })
@@ -13,6 +14,7 @@ const checkSpamMessage = async () => {
   try {
     const res = await axios.post('http://localhost:8080/api/spam-check', {userName: userName.value, email: email.value, message: message.value})
     response.value = res.data.spamResponse
+    console.log(response.value.comment)
   } catch (error) {
     console.log(error)
   }
