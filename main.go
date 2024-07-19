@@ -46,22 +46,22 @@ type spamResponse struct {
 }
 
 type userRequest struct {
-	UserName string `json:"userName"`
-	Email    string `json:"email"`
-	Message  string `json:"message"`
+	UserName string `query:"userName"`
+	Email    string `query:"email"`
+	Message  string `query:"message"`
 }
 
 func main() {
 	app := fiber.New()
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:8080",
-		AllowMethods: "POST, GET, PUT, DELETE",
+		AllowOrigins: "http://localhost:5173",
+		AllowMethods: "GET,POST,PUT,PATCH,DELETE,OPTIONS",
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 	app.Use(logger.New())
 
 	app.Post("/api/spam-check", func(c *fiber.Ctx) error {
-		var req *userRequest
+		var req userRequest
 		fmt.Println("Inside api call")
 		if err := c.BodyParser(&req); err != nil {
 			log.Fatal("error while parsing a request body")
@@ -79,7 +79,7 @@ func main() {
 	app.Listen(":8080")
 }
 
-func checkMessageSpam(requestBody *userRequest) (*spamResponse, error) {
+func checkMessageSpam(requestBody userRequest) (*spamResponse, error) {
 	userIP, errip := getIP()
 	if errip != nil {
 		log.Fatal(errip)
