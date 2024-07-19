@@ -1,11 +1,22 @@
 <script setup>
+import axios from 'axios'
 import { ref } from 'vue'
 const userName = ref('')
 const email =  ref('')
 const message = ref('')
+const response = ref('')
 defineProps({
   msg: String,
 })
+
+const checkSpamMessage = async () => {
+  try {
+    const res = await axios.post('http://localhost:8080/api/spam-check', {userName: userName, email: email, message: message})
+    response.value = res.data.spamResponse
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 const count = ref(0)
 </script>
@@ -28,7 +39,7 @@ const count = ref(0)
       <input class="is-box" type="text" v-model="message">
     </div>
     <br>
-    <button type="button" class="is-button" @click="">Send</button>
+    <button type="button" class="is-button" @click="checkSpamMessage">Send</button>
   </div>
 </template>
 <style scoped>

@@ -64,6 +64,7 @@ func main() {
 	} else {
 		fmt.Println(response)
 	}
+	app.Listen(":8080")
 }
 
 func checkMessageSpam() (*spamResponse, error) {
