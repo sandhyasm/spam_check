@@ -13,9 +13,12 @@ defineProps({
 const checkSpamMessage = async () => {
   try {
     const res = await axios.post('http://localhost:8080/api/spam-check', {userName: userName.value, email: email.value, message: message.value})
-    response.value = res.data.spamResponse
-    error.value = res.data.apiErr
-    console.log(response.value.comment)
+    if (res.data.apiErr!='') {
+      error.value = res.data.apiErr
+    } else {
+      response.value = res.data.spamResponse
+    }
+    
   } catch (error) {
     console.log(error)
   }
